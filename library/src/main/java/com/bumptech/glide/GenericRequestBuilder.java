@@ -655,10 +655,10 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
             previous.recycle();
         }
 
-        Request request = buildRequest(target);
-        target.setRequest(request);
-        lifecycle.addListener(target);
-        requestTracker.runRequest(request);
+        Request request = buildRequest(target);    //构建Request对象：用于发出加载图片请求
+        target.setRequest(request);    //将请求设置到target
+        lifecycle.addListener(target);    //将target加入到lifecycle
+        requestTracker.runRequest(request);    //执行网络请求Request
 
         return target;
     }
@@ -673,7 +673,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
      * @return The {@link com.bumptech.glide.request.target.Target} used to wrap the given {@link ImageView}.
      */
     public Target<TranscodeType> into(ImageView view) {
-        Util.assertMainThread();
+        Util.assertMainThread();    //更新UI线程只能在主线程
         if (view == null) {
             throw new IllegalArgumentException("You must pass in a non null View");
         }
@@ -694,7 +694,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
             }
         }
 
-        return into(glide.buildImageViewTarget(view, transcodeClass));
+        return into(glide.buildImageViewTarget(view, transcodeClass));    //创建Target对象，最终展示图片
     }
 
     /**
@@ -835,6 +835,7 @@ public class GenericRequestBuilder<ModelType, DataType, ResourceType, TranscodeT
 
     private Request obtainRequest(Target<TranscodeType> target, float sizeMultiplier, Priority priority,
             RequestCoordinator requestCoordinator) {
+        //将在load()中调用的所有API参数都组装到Request对象当中
         return GenericRequest.obtain(
                 loadProvider,
                 model,

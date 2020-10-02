@@ -45,7 +45,7 @@ public abstract class ImageViewTarget<Z> extends ViewTarget<ImageView, Z> implem
      */
     @Override
     public void onLoadStarted(Drawable placeholder) {
-        view.setImageDrawable(placeholder);
+        view.setImageDrawable(placeholder);    //在图片请求开始前，会先使用Loading占位图代替最终的图片显示
     }
 
     /**
@@ -56,7 +56,7 @@ public abstract class ImageViewTarget<Z> extends ViewTarget<ImageView, Z> implem
      */
     @Override
     public void onLoadFailed(Exception e, Drawable errorDrawable) {
-        view.setImageDrawable(errorDrawable);
+        view.setImageDrawable(errorDrawable);    //将该error占位图显示到ImageView
     }
 
     /**

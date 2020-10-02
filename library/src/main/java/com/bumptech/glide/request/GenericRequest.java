@@ -116,8 +116,9 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
         @SuppressWarnings("unchecked")
         GenericRequest<A, T, Z, R> request = (GenericRequest<A, T, Z, R>) REQUEST_POOL.poll();
         if (request == null) {
-            request = new GenericRequest<A, T, Z, R>();
+            request = new GenericRequest<A, T, Z, R>();    //创建GenericRequest对象
         }
+        //将传入的Load（）中的API参数赋值到GenericRequest的成员变量
         request.init(loadProvider,
                 model,
                 signature,
@@ -266,14 +267,16 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
         }
 
         status = Status.WAITING_FOR_SIZE;
-        if (Util.isValidDimensions(overrideWidth, overrideHeight)) {
+        if (Util.isValidDimensions(overrideWidth, overrideHeight)) {    //使用了override() API为图片指定了一个固定的宽高
             onSizeReady(overrideWidth, overrideHeight);
         } else {
+            //target.getSize()的内部会根据ImageView的layout_width和layout_height值做一系列的计算，来算出图片显示的宽高
+            //计算后，也会调用onSizeReady()方法进行加载
             target.getSize(this);
         }
 
         if (!isComplete() && !isFailed() && canNotifyStatusChanged()) {
-            target.onLoadStarted(getPlaceholderDrawable());
+            target.onLoadStarted(getPlaceholderDrawable());    //在图片请求开始前，会先使用Loading占位图代替最终的图片显示
         }
         if (Log.isLoggable(TAG, Log.VERBOSE)) {
             logV("finished run method in " + LogTime.getElapsedMillis(startTime));
@@ -396,12 +399,12 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
 
         Drawable error = model == null ? getFallbackDrawable() : null;
         if (error == null) {
-          error = getErrorDrawable();
+          error = getErrorDrawable();    //若有error的占位图，则采用先获取error的占位图
         }
         if (error == null) {
-            error = getPlaceholderDrawable();
+            error = getPlaceholderDrawable();    //没有error的占位图，则再去获取一个loading占位图
         }
-        target.onLoadFailed(e, error);
+        target.onLoadFailed(e, error);    // 将占位图（error / loading）传入到onLoadFailed（）中
     }
 
     private Drawable getErrorDrawable() {
@@ -435,6 +438,7 @@ public final class GenericRequest<A, T, Z, R> implements Request, SizeReadyCallb
         height = Math.round(sizeMultiplier * height);
 
         ModelLoader<A, T> modelLoader = loadProvider.getModelLoader();
+        //创建ImageVideoFetcher对象（传入HttpUrlFetcher对象）
         final DataFetcher<T> dataFetcher = modelLoader.getResourceFetcher(model, width, height);
 
         if (dataFetcher == null) {

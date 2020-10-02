@@ -167,14 +167,14 @@ class DecodeJob<A, T, Z> {
         Resource<T> decoded = null;
         try {
             long startTime = LogTime.getLogTime();
-            final A data = fetcher.loadData(priority);
+            final A data = fetcher.loadData(priority);    //发起网络请求，请求图片返回数据流对象
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
                 logWithTimeAndKey("Fetched data", startTime);
             }
             if (isCancelled) {
                 return null;
             }
-            decoded = decodeFromSourceData(data);
+            decoded = decodeFromSourceData(data);    //从数据流中读取数据，并解码
         } finally {
             fetcher.cleanup();
         }
@@ -187,6 +187,8 @@ class DecodeJob<A, T, Z> {
             decoded = cacheAndDecodeSourceData(data);
         } else {
             long startTime = LogTime.getLogTime();
+            // 调用loadProvider.getSourceDecoder()得到的是GifBitmapWrapperResourceDecoder对象
+            // 即调用GifBitmapWrapperResourceDecoder对象的decode()来对图片进行解码
             decoded = loadProvider.getSourceDecoder().decode(data, width, height);
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
                 logWithTimeAndKey("Decoded from source", startTime);

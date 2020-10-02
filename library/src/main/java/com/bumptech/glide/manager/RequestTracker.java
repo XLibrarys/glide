@@ -24,7 +24,7 @@ public class RequestTracker {
     // references to these requests to ensure that they are not garbage collected before they start running or
     // while they are paused. See #346.
     @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
-    private final List<Request> pendingRequests = new ArrayList<Request>();
+    private final List<Request> pendingRequests = new ArrayList<Request>();    //上下文暂停等待的图片请求
 
     private boolean isPaused;
 
@@ -32,11 +32,12 @@ public class RequestTracker {
      * Starts tracking the given request.
      */
     public void runRequest(Request request) {
+        //将每个提交的请求加入到一个set中：管理请求
         requests.add(request);
         if (!isPaused) {
-            request.begin();
+            request.begin();     //若不处于暂停状态，则调用GenericRequest的begin()来执行Request
         } else {
-            pendingRequests.add(request);
+            pendingRequests.add(request);    // 若处于暂停，则先将Request添加到待执行队列里面，等暂停状态解除后再执行
         }
     }
 
@@ -80,7 +81,7 @@ public class RequestTracker {
         isPaused = false;
         for (Request request : Util.getSnapshot(requests)) {
             if (!request.isComplete() && !request.isCancelled() && !request.isRunning()) {
-                request.begin();
+                request.begin();    //上下文恢复的时候，执行等待的图片请求
             }
         }
         pendingRequests.clear();

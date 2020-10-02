@@ -55,7 +55,7 @@ class EngineRunnable implements Runnable, Prioritized {
         Exception exception = null;
         Resource<?> resource = null;
         try {
-            resource = decode();
+            resource = decode();    //最终得到了Resource<GlideDrawable>对象
         } catch (Exception e) {
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
                 Log.v(TAG, "Exception decoding", e);
@@ -73,7 +73,7 @@ class EngineRunnable implements Runnable, Prioritized {
         if (resource == null) {
             onLoadFailed(exception);
         } else {
-            onLoadComplete(resource);
+            onLoadComplete(resource);    //表示图片加载已经完成
         }
     }
 
@@ -96,16 +96,16 @@ class EngineRunnable implements Runnable, Prioritized {
 
     private Resource<?> decode() throws Exception {
         if (isDecodingFromCache()) {
-            return decodeFromCache();
+            return decodeFromCache();    //硬盘缓存获取图片
         } else {
-            return decodeFromSource();
+            return decodeFromSource();    //从网络获取图片
         }
     }
 
     private Resource<?> decodeFromCache() throws Exception {
         Resource<?> result = null;
         try {
-            result = decodeJob.decodeResultFromCache();
+            result = decodeJob.decodeResultFromCache();    //从硬盘缓存中获取图片
         } catch (Exception e) {
             if (Log.isLoggable(TAG, Log.DEBUG)) {
                 Log.d(TAG, "Exception decoding result from cache: " + e);

@@ -83,6 +83,9 @@ public class RequestManagerRetriever implements Handler.Callback {
         if (context == null) {
             throw new IllegalArgumentException("You cannot start a load on a null Context");
         } else if (Util.isOnMainThread() && !(context instanceof Application)) {
+            //非Application类型（Activity & Fragment），
+            //Glide加载图片的生命周期与Activity生命周期同步的具体做法：向当前的Activity添加一个隐藏的Fragment
+            //因Fragment的生命周期 与 Activity 的是同步的，通过添加隐藏的Fragment 从而监听Activity的生命周期，从而实现Glide加载图片的生命周期与Activity的生命周期 进行同步。
             if (context instanceof FragmentActivity) {
                 return get((FragmentActivity) context);
             } else if (context instanceof Activity) {
@@ -92,6 +95,8 @@ public class RequestManagerRetriever implements Handler.Callback {
             }
         }
 
+        //Application类型（Context），最终获取一个单例RequestManager对象，加载图片的生命周期是自动与应用程序的生命周期绑定
+        //不需要做特殊处理（若应用程序关闭，Glide的加载也会终止）
         return getApplicationManager(context);
     }
 
@@ -99,9 +104,9 @@ public class RequestManagerRetriever implements Handler.Callback {
         if (Util.isOnBackgroundThread()) {
             return get(activity.getApplicationContext());
         } else {
-            assertNotDestroyed(activity);
+            assertNotDestroyed(activity);    //判断activity是否已经销毁
             FragmentManager fm = activity.getSupportFragmentManager();
-            return supportFragmentGet(activity, fm);
+            return supportFragmentGet(activity, fm);    //过fragmentGet返回RequestManager
         }
     }
 
@@ -182,9 +187,11 @@ public class RequestManagerRetriever implements Handler.Callback {
         if (current == null) {
             current = pendingSupportRequestManagerFragments.get(fm);
             if (current == null) {
+                ///创建Fragment，向当前的Activity中添加一个隐藏的Fragment
                 current = new SupportRequestManagerFragment();
                 pendingSupportRequestManagerFragments.put(fm, current);
                 fm.beginTransaction().add(current, FRAGMENT_TAG).commitAllowingStateLoss();
+                //FIXME pendingSupportRequestManagerFragments缓存的意义，刚添加缓存，就发消息删除了
                 handler.obtainMessage(ID_REMOVE_SUPPORT_FRAGMENT_MANAGER, fm).sendToTarget();
             }
         }
@@ -192,9 +199,11 @@ public class RequestManagerRetriever implements Handler.Callback {
     }
 
     RequestManager supportFragmentGet(Context context, FragmentManager fm) {
+        //创建Fragment，向当前的Activity中添加一个隐藏的Fragment
         SupportRequestManagerFragment current = getSupportRequestManagerFragment(fm);
         RequestManager requestManager = current.getRequestManager();
         if (requestManager == null) {
+            //创建RequestManager传入Lifecycle实现类，如ActivityFragmentLifecycle
             requestManager = new RequestManager(context, current.getLifecycle(), current.getRequestManagerTreeNode());
             current.setRequestManager(requestManager);
         }

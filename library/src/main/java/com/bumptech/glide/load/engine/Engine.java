@@ -148,20 +148,20 @@ public class Engine implements EngineJobListener,
         final String id = fetcher.getId();
         EngineKey key = keyFactory.buildKey(id, signature, width, height, loadProvider.getCacheDecoder(),
                 loadProvider.getSourceDecoder(), transformation, loadProvider.getEncoder(),
-                transcoder, loadProvider.getSourceEncoder());
+                transcoder, loadProvider.getSourceEncoder());    //构建缓存中的key，和url，宽高有关；
 
-        EngineResource<?> cached = loadFromCache(key, isMemoryCacheable);
+        EngineResource<?> cached = loadFromCache(key, isMemoryCacheable);    //从内存缓存中获取图片
         if (cached != null) {
-            cb.onResourceReady(cached);
+            cb.onResourceReady(cached);   //存在缓存，则回到资源准备好了onResourceReady
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
                 logWithTimeAndKey("Loaded resource from cache", startTime, key);
             }
             return null;
         }
 
-        EngineResource<?> active = loadFromActiveResources(key, isMemoryCacheable);
+        EngineResource<?> active = loadFromActiveResources(key, isMemoryCacheable);    //从活动缓存后去图片，保护使用的图片被LRU缓存清除
         if (active != null) {
-            cb.onResourceReady(active);
+            cb.onResourceReady(active);    //存在缓存，则回到资源准备好了onResourceReady
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
                 logWithTimeAndKey("Loaded resource from active resources", startTime, key);
             }
@@ -180,7 +180,7 @@ public class Engine implements EngineJobListener,
         EngineJob engineJob = engineJobFactory.build(key, isMemoryCacheable);
         DecodeJob<T, Z, R> decodeJob = new DecodeJob<T, Z, R>(key, width, height, fetcher, loadProvider, transformation,
                 transcoder, diskCacheProvider, diskCacheStrategy, priority);
-        EngineRunnable runnable = new EngineRunnable(engineJob, decodeJob, priority);
+        EngineRunnable runnable = new EngineRunnable(engineJob, decodeJob, priority);    //缓存中没有，创建Runnable从磁盘或则网络获取图片
         jobs.put(key, engineJob);
         engineJob.addCallback(cb);
         engineJob.start(runnable);
@@ -201,6 +201,7 @@ public class Engine implements EngineJobListener,
         }
 
         EngineResource<?> active = null;
+        //从当前正在使用的图片缓存中获取，WeakReference引用保存
         WeakReference<EngineResource<?>> activeRef = activeResources.get(key);
         if (activeRef != null) {
             active = activeRef.get();
@@ -222,14 +223,14 @@ public class Engine implements EngineJobListener,
         EngineResource<?> cached = getEngineResourceFromCache(key);
         if (cached != null) {
             cached.acquire();
-            activeResources.put(key, new ResourceWeakReference(key, cached, getReferenceQueue()));
+            activeResources.put(key, new ResourceWeakReference(key, cached, getReferenceQueue()));   //内存缓存中存在，使用前添加到活动缓存中
         }
         return cached;
     }
 
     @SuppressWarnings("unchecked")
     private EngineResource<?> getEngineResourceFromCache(Key key) {
-        Resource<?> cached = cache.remove(key);
+        Resource<?> cached = cache.remove(key);    //从LRU内存缓存中获取，并移除
 
         final EngineResource result;
         if (cached == null) {
@@ -260,7 +261,7 @@ public class Engine implements EngineJobListener,
         if (resource != null) {
             resource.setResourceListener(key, this);
 
-            if (resource.isCacheable()) {
+            if (resource.isCacheable()) {    //图片加载完毕，将图片缓存在活动缓存中
                 activeResources.put(key, new ResourceWeakReference(key, resource, getReferenceQueue()));
             }
         }
@@ -288,7 +289,7 @@ public class Engine implements EngineJobListener,
         Util.assertMainThread();
         activeResources.remove(cacheKey);
         if (resource.isCacheable()) {
-            cache.put(cacheKey, resource);
+            cache.put(cacheKey, resource);    //添加到内存缓存中
         } else {
             resourceRecycler.recycle(resource);
         }

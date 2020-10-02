@@ -150,16 +150,16 @@ class EngineJob implements EngineRunnable.EngineRunnableManager {
         // Hold on to resource for duration of request so we don't recycle it in the middle of notifying if it
         // synchronously released by one of the callbacks.
         engineResource.acquire();
-        listener.onEngineJobComplete(key, engineResource);
+        listener.onEngineJobComplete(key, engineResource);    //正在使用的图片使用活动缓存
 
-        for (ResourceCallback cb : cbs) {
+        for (ResourceCallback cb : cbs) {    //通过循环，调用了所有ResourceCallback的onResourceReady()
             if (!isInIgnoredCallbacks(cb)) {
                 engineResource.acquire();
                 cb.onResourceReady(engineResource);
             }
         }
         // Our request is complete, so we can release the resource.
-        engineResource.release();
+        engineResource.release();    //如果图片没有人使用了，则通过LRU缓存
     }
 
     @Override

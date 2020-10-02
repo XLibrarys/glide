@@ -40,7 +40,7 @@ import java.util.UUID;
  * @see Glide#with(android.support.v4.app.Fragment)
  * @see Glide#with(Context)
  */
-public class RequestManager implements LifecycleListener {
+public class RequestManager implements LifecycleListener {    //实现上下文生命周期回调
     private final Context context;
     private final Lifecycle lifecycle;
     private final RequestManagerTreeNode treeNode;
@@ -72,7 +72,7 @@ public class RequestManager implements LifecycleListener {
             new Handler(Looper.getMainLooper()).post(new Runnable() {
                 @Override
                 public void run() {
-                    lifecycle.addListener(RequestManager.this);
+                    lifecycle.addListener(RequestManager.this);    //RequestManager监听上下文声明周期回调
                 }
             });
         } else {
@@ -200,7 +200,7 @@ public class RequestManager implements LifecycleListener {
     @Override
     public void onStart() {
         // onStart might not be called because this object may be created after the fragment/activity's onStart method.
-        resumeRequests();
+        resumeRequests();    //上下文生命周期start，恢复执行图片的请求
     }
 
     /**
@@ -209,7 +209,7 @@ public class RequestManager implements LifecycleListener {
      */
     @Override
     public void onStop() {
-        pauseRequests();
+        pauseRequests();    //上下文生命周期stop，停止正在执行的图片请求
     }
 
     /**
@@ -622,7 +622,9 @@ public class RequestManager implements LifecycleListener {
     }
 
     private <T> DrawableTypeRequest<T> loadGeneric(Class<T> modelClass) {
+        //创建第1个ModelLoader对象；作用：加载图片
         ModelLoader<T, InputStream> streamModelLoader = Glide.buildStreamModelLoader(modelClass, context);
+        //创建第2个ModelLoader对象，作用同上：加载图片
         ModelLoader<T, ParcelFileDescriptor> fileDescriptorModelLoader =
                 Glide.buildFileDescriptorModelLoader(modelClass, context);
         if (modelClass != null && streamModelLoader == null && fileDescriptorModelLoader == null) {
@@ -631,6 +633,7 @@ public class RequestManager implements LifecycleListener {
                     + " Glide#register with a ModelLoaderFactory for your custom model class");
         }
 
+        //传入刚才创建的ModelLoader对象 和 其他初始化配置的参数
         return optionsApplier.apply(
                 new DrawableTypeRequest<T>(modelClass, streamModelLoader, fileDescriptorModelLoader, context,
                         glide, requestTracker, lifecycle, optionsApplier));

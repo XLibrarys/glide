@@ -69,6 +69,7 @@ public class DrawableTypeRequest<ModelType> extends DrawableRequestBuilder<Model
      * @return A new request builder for loading a {@link android.graphics.Bitmap}
      */
     public BitmapTypeRequest<ModelType> asBitmap() {
+        //强制加载 静态图片
         return optionsApplier.apply(new BitmapTypeRequest<ModelType>(this, streamModelLoader,
                 fileDescriptorModelLoader, optionsApplier));
     }
@@ -86,6 +87,7 @@ public class DrawableTypeRequest<ModelType> extends DrawableRequestBuilder<Model
      * @return A new request builder for loading a {@link com.bumptech.glide.load.resource.gif.GifDrawable}.
      */
     public GifTypeRequest<ModelType> asGif() {
+        //强制加载 动态图片
         return optionsApplier.apply(new GifTypeRequest<ModelType>(this, streamModelLoader, optionsApplier));
     }
 

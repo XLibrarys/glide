@@ -59,7 +59,7 @@ public class HttpUrlFetcher implements DataFetcher<InputStream> {
                 // Do nothing, this is best effort.
             }
         }
-        urlConnection = connectionFactory.build(url);
+        urlConnection = connectionFactory.build(url);    //构建网络请求，获取图片
         for (Map.Entry<String, String> headerEntry : headers.entrySet()) {
           urlConnection.addRequestProperty(headerEntry.getKey(), headerEntry.getValue());
         }

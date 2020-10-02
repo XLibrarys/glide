@@ -626,7 +626,7 @@ public class Glide {
      */
     public static RequestManager with(Context context) {
         RequestManagerRetriever retriever = RequestManagerRetriever.get();
-        return retriever.get(context);
+        return retriever.get(context);    //绑定图片加载的生命周期
     }
 
     /**

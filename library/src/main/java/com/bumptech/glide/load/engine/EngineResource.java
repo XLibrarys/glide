@@ -15,7 +15,7 @@ class EngineResource<Z> implements Resource<Z> {
     private final boolean isCacheable;
     private ResourceListener listener;
     private Key key;
-    private int acquired;
+    private int acquired;    //记录图片被引用的次数
     private boolean isRecycled;
 
     interface ResourceListener {
